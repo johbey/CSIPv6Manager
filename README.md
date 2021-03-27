@@ -33,7 +33,7 @@ Download release binaries.
 5. Add Server with IP Address '127.0.0.1' to your favorites
 6. Connect to the Server
 
-[Client Page](https://github.com/johbey/CSIPv6Manager/blob/main/images/client.png)
+![Client Page](https://github.com/johbey/CSIPv6Manager/blob/main/images/client.png?raw=true)
 
 Care: 
 You can change the IPv4 and IPv6 ports if its necessary.
@@ -48,7 +48,7 @@ Errors will be displayed at the bottom.
 5. Click 'Start Server'
 6. Send IPv6 Address to your clients
 
-[Server Page](https://github.com/johbey/CSIPv6Manager/blob/main/images/server.png)
+![Server Page](https://github.com/johbey/CSIPv6Manager/blob/main/images/server.png?raw=true)
 
 Care: 
 The connected client IP's will be listed in this page.
