@@ -29,12 +29,15 @@ Download release binaries.
 1. Open CSIPv6Manager
 2. Paste server IPv6 Address to the text field
 3. Click 'Start'
-
 4. Open Counter Strike 1.6
 5. Add Server with IP Address '127.0.0.1' to your favorites
 6. Connect to the Server
 
-Care: You can change the IPv4 and IPv6 ports if its necessary
+[Client Page](https://github.com/johbey/CSIPv6Manager/blob/main/images/client.png)
+
+Care: 
+You can change the IPv4 and IPv6 ports if its necessary.
+Errors will be displayed at the bottom.
 
 ### Configure Server
 
@@ -45,7 +48,12 @@ Care: You can change the IPv4 and IPv6 ports if its necessary
 5. Click 'Start Server'
 6. Send IPv6 Address to your clients
 
-Care: You can change the IPv4 and IPv6 ports if its necessary
+[Server Page](https://github.com/johbey/CSIPv6Manager/blob/main/images/server.png)
+
+Care: 
+The connected client IP's will be listed in this page.
+You can change the IPv4 and IPv6 ports if its necessary.
+Errors will be displayed at the bottom.
 
 ## Attributions:
 Icon https://www.flaticon.com/authors/smashicons
