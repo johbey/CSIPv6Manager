@@ -20,7 +20,8 @@ The client PCs can then start Counter Strike 1.6 and connect to the server via t
 
 OR
 
-Download release binaries.
+Download release binaries:
+[Link to binaries](https://github.com/johbey/CSIPv6Manager/releases)
 
 ## How To
 
