@@ -48,6 +48,7 @@ Errors will be displayed at the bottom.
 4. Switch to the Server page (left top menu)
 5. Click 'Start Server'
 6. Send IPv6 Address to your clients
+7. Open Port 37015 UDP
 
 ![Server Page](https://github.com/johbey/CSIPv6Manager/blob/main/images/server.png?raw=true)
 
