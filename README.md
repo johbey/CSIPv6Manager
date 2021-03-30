@@ -58,5 +58,6 @@ You can change the IPv4 and IPv6 ports if its necessary.
 Errors will be displayed at the bottom.
 
 ## Attributions:
-Icon https://www.flaticon.com/authors/smashicons
-Qt https://doc.qt.io/
+Icon https://www.flaticon.com/authors/smashicons<br>
+Qt https://doc.qt.io/<br>
+Classes Client and Server: [NGE] Kotnascher
