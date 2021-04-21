@@ -48,6 +48,7 @@ Errors will be displayed at the bottom.
 4. Switch to the Server page (left top menu)
 5. Click 'Start Server'
 6. Send IPv6 Address to your clients
+7. Open Port 37015 UDP
 
 ![Server Page](https://github.com/johbey/CSIPv6Manager/blob/main/images/server.png?raw=true)
 
@@ -57,5 +58,6 @@ You can change the IPv4 and IPv6 ports if its necessary.
 Errors will be displayed at the bottom.
 
 ## Attributions:
-Icon https://www.flaticon.com/authors/smashicons
-Qt https://doc.qt.io/
+Icon https://www.flaticon.com/authors/smashicons<br>
+Qt https://doc.qt.io/<br>
+Classes Client and Server: [NGE] Kotnascher
