@@ -14,9 +14,9 @@ The client PCs can then start Counter Strike 1.6 and connect to the server via t
 ## Installation
 
 1. Clone this repository
-2. Open CSIPv6Manager.pro in Qt Creator
-3. Compile the project
-4. Start CSIPv6Manager
+2. Open CSIPv6Manager\CSIPv6Manager.pro and CSv6\CSv6.pro in Qt Creator
+3. Compile the projects
+4. Start CSIPv6Manager (for command line version use CSv6 only)
 
 OR
 
@@ -60,4 +60,4 @@ Errors will be displayed at the bottom.
 ## Attributions:
 Icon https://www.flaticon.com/authors/smashicons<br>
 Qt https://doc.qt.io/<br>
-Classes Client and Server: [NGE] Kotnascher
+CSv6: [NGE] Kotnascher
