@@ -80,8 +80,13 @@ Page {
         anchors.top: parent.top
         anchors.topMargin: 20
         anchors.leftMargin: 20
-        // @disable-check M222
-        onClicked: textField.paste()
+        // @disable-check M223
+        onClicked: {
+            // @disable-check M222
+            textField.clear()
+            // @disable-check M222
+            textField.paste()
+        }
     }
 
     Label {

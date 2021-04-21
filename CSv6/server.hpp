@@ -18,24 +18,18 @@ public:
 		std::uint16_t portIPv6
 		, std::uint16_t portIPv4
 		, QObject *parent = nullptr);
-    ~Server();
+	~Server();
 
 private:
 	struct ClientMapping;
 
 private:
-    void initialize(std::uint16_t portIPv6);
-
 	ClientMapping* mapClient(
 		const QHostAddress& addressIPv6
 		, std::uint16_t portIPv6);
 	void readFromIPv6Client();
 	void readFromIPv4Server(
 		ClientMapping* mapping);
-
-signals:
-    void connectionMapped(QString);
-    void errorMessage(QString);
 
 private:
 	QUdpSocket m_socketIPv6;

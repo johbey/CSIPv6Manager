@@ -1,7 +1,6 @@
 
 #include <iostream>
 #include <QNetworkDatagram>
-#include <QTimer>
 #include "client.hpp"
 #include "config.hpp"
 #include "utility.hpp"
@@ -31,42 +30,27 @@ Client::Client(
 	, m_portIPv6(portIPv6)
 	, m_dynamicPortIPv6(portIPv6) // to be incremented, see general note (2)
 {
-    QTimer::singleShot(100, this, [=]
-    {
-        initialize(portIPv4);
-    });
+	std::cout
+		<< "[client] server: " << serverAddressIPv6 << ":" << portIPv6
+		<< std::endl;
+
+	{ // setup local IPv4 server
+	if (m_socketIPv4.bind(LocalHostIPv4, portIPv4, BindMode))
+	{
+		connect(&m_socketIPv4, &QIODevice::readyRead, this, &Client::readFromIPv4Client);
+		std::cout
+			<< "[client] listening on: " << Endpoint{ LocalHostIPv4, portIPv4 }
+			<< std::endl;
+	}
+	else
+	{
+		std::cout << SocketError{ "[client] IPv4", m_socketIPv4 } << std::endl;
+	}
+	}
+
 }
 
 Client::~Client() = default;
-
-void Client::initialize(const std::uint16_t portIPv4)
-{
-    if (m_serverAddressIPv6.isNull())
-    {
-        emit errorMessage("No IPv6 Address");
-        return;
-    }
-
-    std::cout
-        << "[client] server: " << m_serverAddressIPv6 << ":" << m_portIPv6
-        << std::endl;
-
-    { // setup local IPv4 server
-    if (m_socketIPv4.bind(LocalHostIPv4, portIPv4, BindMode))
-    {
-        connect(&m_socketIPv4, &QIODevice::readyRead, this, &Client::readFromIPv4Client);
-        std::cout
-            << "[client] listening on: " << Endpoint{ LocalHostIPv4, portIPv4 }
-            << std::endl;
-    }
-    else
-    {
-        const auto error = SocketError{ "[client] IPv4", m_socketIPv4 };
-        std::cout << error << std::endl;
-        emit errorMessage(error.toString());
-    }
-    }
-}
 
 /*!	\note we assume \a localhost only
  *	\note see general note (1)
@@ -96,21 +80,19 @@ Client::ClientMapping* Client::mapClient(
 				ok = true;
 				break;
 			}
-            const auto error = SocketError{ "[client] IPv6", socketIPv6 };
-            std::cout << error << std::endl;
-            socketIPv6.close(); // else may be "half open" (?)
+			std::cout << SocketError{ "[client] IPv6", socketIPv6 } << std::endl;
+			socketIPv6.close(); // else may be "half open" (?)
 		}
 		if (ok)
-        {
+		{
 			connect(&socketIPv6, &QIODevice::readyRead, this, [this, mapping]
 			{
 				readFromIPv6Server(&*mapping);
-            });
+			});
 		}
 		else
 		{	// maybe retry later
 			mapping = {};
-            emit errorMessage("mapping error, maybe retry later");
 		}
 	}
 	return &*mapping;
@@ -124,8 +106,7 @@ void Client::readFromIPv6Server(
 	auto& socketIPv6 = mapping->socketIPv6;
 	const auto portIPv4 = mapping->portIPv4;
 
-    while (socketIPv6.state() == QAbstractSocket::BoundState
-        && socketIPv6.hasPendingDatagrams())
+	while (socketIPv6.hasPendingDatagrams())
 	{
 		const auto datagram = socketIPv6.receiveDatagram();
 		LOG_RECEIVED_DGRAM("[client]", datagram);
@@ -136,26 +117,23 @@ void Client::readFromIPv6Server(
 
 		if (n == -1)
 		{
-            const auto error = SocketError{ "[client] IPv4", m_socketIPv4 };
-            std::cout << error << std::endl;
-            emit errorMessage(error.toString());
+			std::cout << SocketError{ "[client] IPv4", m_socketIPv4 } << std::endl;
 		}
-    }
+	}
 }
 
 /*!	forward to IPv6 server
  */
 void Client::readFromIPv4Client()
 {
-    while (m_socketIPv4.state() == QAbstractSocket::BoundState
-        && m_socketIPv4.hasPendingDatagrams())
+	while (m_socketIPv4.hasPendingDatagrams())
 	{
 		const auto datagram = m_socketIPv4.receiveDatagram();
 		LOG_RECEIVED_DGRAM("[client]", datagram);
 		const auto portIPv4 = static_cast<std::uint16_t>(datagram.senderPort());
 		auto* mapping = mapClient(portIPv4);
 
-        if (mapping)
+		if (mapping)
 		{
 			auto& socketIPv6 = mapping->socketIPv6;
 			const auto n = socketIPv6.writeDatagram(
@@ -165,18 +143,8 @@ void Client::readFromIPv4Client()
 
 			if (n == -1)
 			{
-                const auto error = SocketError{ "[client] IPv6", socketIPv6 };
-                std::cout << error << std::endl;
-                emit errorMessage(error.toString());
+				std::cout << SocketError{ "[client] IPv6", socketIPv6 } << std::endl;
 			}
-        }
-        else
-        {
-            return;
-        }
+		}
 	}
-    if (m_socketIPv4.state() != QAbstractSocket::BoundState)
-    {
-        emit errorMessage("IPv4 connection lost");
-    }
 }

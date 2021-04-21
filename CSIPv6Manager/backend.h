@@ -4,8 +4,7 @@
 #include <QObject>
 #include <memory>
 
-class Client;
-class Server;
+class QProcess;
 
 struct QObjectDeleteLater {
     void operator()(QObject *o) {
@@ -20,8 +19,8 @@ class BackEnd : public QObject
     Q_PROPERTY(int ipv6Port READ ipv6Port WRITE setIpv6Port NOTIFY ipv6PortChanged)
     Q_PROPERTY(QStringList clients READ clients WRITE setClients NOTIFY clientsChanged)
     Q_PROPERTY(QString ipv6Address READ ipv6Address WRITE setIpv6Address NOTIFY ipv6AddressChanged)
-    Q_PROPERTY(QString serverError READ serverError WRITE setServerError NOTIFY serverErrorChanged)
-    Q_PROPERTY(QString clientError READ clientError WRITE setClientError NOTIFY clientErrorChanged)
+    Q_PROPERTY(QString serverError READ serverError WRITE setServerMessage NOTIFY serverErrorChanged)
+    Q_PROPERTY(QString clientError READ clientError WRITE setClientMessage NOTIFY clientErrorChanged)
 
 public:
     explicit BackEnd(QObject *parent = nullptr);
@@ -37,11 +36,14 @@ public:
     QString ipv6Address();
     void setIpv6Address(const QString& address);
     QString serverError();
-    void setServerError(const QString& message);
+    void setServerMessage(const QString& message);
+    void readServerMessage();
     QString clientError();
-    void setClientError(const QString& message);
+    void setClientMessage(const QString& message);
+    void readClientMessage();
 
     void updateIpv6Address();
+    QStringList portArguments();
 
 public slots:
     void connectClient(QString address);
@@ -74,8 +76,8 @@ private:
     QString m_serverError;
     QString m_clientError;
 
-    std::unique_ptr<Client, QObjectDeleteLater> m_client;
-    std::unique_ptr<Server, QObjectDeleteLater> m_server;
+    std::unique_ptr<QProcess, QObjectDeleteLater> m_client;
+    std::unique_ptr<QProcess, QObjectDeleteLater> m_server;
 };
 
 #endif // BACKEND_H

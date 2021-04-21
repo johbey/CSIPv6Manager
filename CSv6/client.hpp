@@ -25,11 +25,7 @@ public:
 private:
 	struct ClientMapping;
 
-signals:
-    void errorMessage(QString);
-
 private:
-    void initialize(const std::uint16_t);
 	ClientMapping* mapClient(
 		std::uint16_t portIPv4);
 	void readFromIPv6Server(

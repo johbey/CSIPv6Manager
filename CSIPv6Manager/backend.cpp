@@ -1,11 +1,10 @@
 #include "backend.h"
 
-#include "client.hpp"
-#include "server.hpp"
-
 #include <QNetworkAccessManager>
 #include <QEventLoop>
 #include <QNetworkReply>
+#include <QHostAddress>
+#include <QProcess>
 
 BackEnd::BackEnd(QObject *parent) :
     QObject(parent),
@@ -16,6 +15,8 @@ BackEnd::BackEnd(QObject *parent) :
 
 BackEnd::~BackEnd()
 {
+    disconnectClient();
+    stopServer();
 }
 
 int BackEnd::ipv4Port()
@@ -100,20 +101,31 @@ QString BackEnd::serverError()
     return m_serverError;
 }
 
-void BackEnd::setServerError(const QString& message)
+void BackEnd::setServerMessage(const QString& message)
 {
-    if (message == m_serverError)
+    m_serverError = message;
+    emit serverErrorChanged();
+}
+void BackEnd::readServerMessage()
+{
+    QByteArray error = m_server.get()->readAllStandardError();
+    QByteArray output = m_server.get()->readAllStandardOutput();
+
+    const int connectionIndex = output.indexOf("connection from: ") + 17;
+    if (connectionIndex != 16)
     {
+        const int portIndex = output.lastIndexOf(":", connectionIndex);
+        addClient(output.mid(connectionIndex, portIndex-connectionIndex));
         return;
     }
 
-    if (!message.isEmpty())
+    const int errorIndex = output.indexOf("error");
+    if (errorIndex != -1
+            || !error.isEmpty())
     {
         stopServer();
+        setServerMessage(output+error);
     }
-
-    m_serverError = message;
-    emit serverErrorChanged();
 }
 
 QString BackEnd::clientError()
@@ -121,20 +133,26 @@ QString BackEnd::clientError()
     return m_clientError;
 }
 
-void BackEnd::setClientError(const QString& message)
+void BackEnd::setClientMessage(const QString& message)
 {
-    if (message == m_clientError)
-    {
-        return;
-    }
-
-    if (!message.isEmpty())
-    {
-        disconnectClient();
-    }
-
     m_clientError = message;
     emit clientErrorChanged();
+}
+
+void BackEnd::readClientMessage()
+{
+    QByteArray error = m_client.get()->readAllStandardError();
+    QByteArray output = m_client.get()->readAllStandardOutput();
+
+    const int errorIndex = output.indexOf("error");
+    if (errorIndex != -1
+            || !error.isEmpty())
+    {
+        disconnectClient();
+        setClientMessage(output + error);
+    }
+
+
 }
 
 
@@ -150,20 +168,42 @@ void BackEnd::updateIpv6Address()
     setIpv6Address(ipv6);
 }
 
+QStringList BackEnd::portArguments()
+{
+    QStringList result;
+    result << "-p" << QString::number(ipv6Port());
+    result << "-q" << QString::number(ipv4Port());
+    return result;
+}
+
 void BackEnd::connectClient(const QString address)
 {
+    if (address.isEmpty())
+    {
+        setClientMessage("no ipv6 address!");
+        return;
+    }
+
     const QHostAddress serverAddress(address);
-    m_client.reset(new Client(
-                serverAddress,
-                static_cast<std::uint16_t>(ipv6Port()),
-                static_cast<std::uint16_t>(ipv4Port())));
-    connect(m_client.get(), &Client::errorMessage, this, &BackEnd::setClientError);
-    setClientError({});
+    m_client.reset(new QProcess());
+    m_client.get()->start(
+                "CSv6.exe",
+                { "-p", QString::number(ipv6Port()), "-q", QString::number(ipv4Port()), serverAddress.toString() });
+    connect(m_client.get(), &QProcess::readyReadStandardOutput, this, &BackEnd::readClientMessage);
+    connect(m_client.get(), &QProcess::readyReadStandardError, this, &BackEnd::readClientMessage);
+
+    m_clientError.clear();
+    emit clientErrorChanged();
     emit clientConnected();
 }
 
 void BackEnd::disconnectClient()
 {
+    if (m_client != nullptr)
+    {
+        m_client->kill();
+    }
+
     m_client.reset(nullptr);
     emit clientDisconnected();
 }
@@ -183,17 +223,25 @@ void BackEnd::toggleClient(const QString address)
 void BackEnd::startServer()
 {
     updateIpv6Address();
-    m_server.reset(new Server(
-                static_cast<std::uint16_t>(ipv6Port()),
-                static_cast<std::uint16_t>(ipv4Port())));
-    connect(m_server.get(), &Server::connectionMapped, this, &BackEnd::addClient);
-    connect(m_server.get(), &Server::errorMessage, this, &BackEnd::setServerError);
-    setServerError({});
+
+    m_server.reset(new QProcess());
+    m_server.get()->start(
+                "CSv6.exe",
+                { "-s", "-p", QString::number(ipv6Port()), "-q", QString::number(ipv4Port()) });
+    connect(m_server.get(), &QProcess::readyReadStandardOutput, this, &BackEnd::readServerMessage);
+    connect(m_server.get(), &QProcess::readyReadStandardError, this, &BackEnd::readServerMessage);
+
+    m_serverError.clear();
+    emit serverErrorChanged();
     emit serverStarted();
 }
 
 void BackEnd::stopServer()
 {
+    if (m_server != nullptr)
+    {
+        m_server->kill();
+    }
     m_server.reset(nullptr);
     setClients({});
     setIpv6Address({});

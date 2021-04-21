@@ -1,7 +1,7 @@
 QT += quick
 CONFIG += c++17 qmltypes
 
-VERSION = 0.0.1
+VERSION = 0.0.2
 
 QML_IMPORT_NAME = io.qt.ipv6.backend
 QML_IMPORT_MAJOR_VERSION = 1
@@ -19,9 +19,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     backend.cpp \
-    client.cpp \
     main.cpp \
-    server.cpp \
     utility.cpp
 
 RESOURCES += qml.qrc
@@ -41,7 +39,5 @@ RC_ICONS = myappico.ico
 
 HEADERS += \
     backend.h \
-    client.hpp \
     config.hpp \
-    server.hpp \
     utility.hpp
